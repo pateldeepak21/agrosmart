@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Optimizer — AgroSmart</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🌱 <span>Agro</span>Smart</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="optimizer.html" class="active">Optimizer</a></li>
+      <li><a href="history.html">Field History</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>⚙️ Fertilizer Optimizer</h1>
+    <p>Enter your field details to get AI-calculated NPK recommendations</p>
+  </div>
+</div>
+
+<div class="container" style="padding-top:36px; padding-bottom:60px;">
+
+  <div class="tabs-row">
+    <button class="tab-btn active" data-tab="inputs">📋 Field Parameters</button>
+    <button class="tab-btn" data-tab="results">📊 Results</button>
+    <button class="tab-btn" data-tab="schedule">📅 Schedule</button>
+  </div>
+
+  <!-- ─── TAB 1: INPUTS ─── -->
+  <div class="tab-panel active" id="panel-inputs">
+
+    <div class="grid-2" style="gap:28px; align-items:start;">
+
+      <!-- LEFT: Form -->
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title">👤 Farmer Information</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Farmer Name *</label>
+              <input type="text" id="farmer_name" class="form-input" placeholder="e.g. Ramesh Kumar"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Field Name (Optional)</label>
+              <input type="text" id="field_name" class="form-input" placeholder="e.g. North Field"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title">🌾 Crop & Soil</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Crop Type *</label>
+              <select id="crop" class="form-select" onchange="updatePreview()">
+                <option value="wheat">🌾 Wheat</option>
+                <option value="rice">🍚 Rice</option>
+                <option value="maize">🌽 Maize / Corn</option>
+                <option value="sugarcane">🎋 Sugarcane</option>
+                <option value="cotton">☁️ Cotton</option>
+                <option value="soybean">🫘 Soybean</option>
+                <option value="potato">🥔 Potato</option>
+                <option value="tomato">🍅 Tomato</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Soil Type *</label>
+              <select id="soil" class="form-select" onchange="updatePreview()">
+                <option value="loamy">Loamy (Ideal)</option>
+                <option value="sandy">Sandy (Low retention)</option>
+                <option value="clayey">Clayey (High retention)</option>
+                <option value="silty">Silty (Moderate)</option>
+                <option value="black">Black Cotton Soil</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Season *</label>
+              <select id="season" class="form-select">
+                <option value="kharif">Kharif (Monsoon — June–Oct)</option>
+                <option value="rabi">Rabi (Winter — Nov–March)</option>
+                <option value="zaid">Zaid (Summer — Feb–June)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prior Crop / Residue</label>
+              <select id="residue" class="form-select" onchange="updatePreview()">
+                <option value="none">None (Fresh field)</option>
+                <option value="legume">Legume (adds ~30 kg N)</option>
+                <option value="cereal">Cereal stubble</option>
+                <option value="compost">Compost applied</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title">📐 Field Measurements</div>
+          <div class="form-group">
+            <label class="form-label">Field Area (Hectares) *</label>
+            <input type="number" id="area" class="form-input" value="2" min="0.1" step="0.1" oninput="updatePreview()"/>
+            <div class="form-hint">1 hectare = 10,000 m² = 2.47 acres</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Soil pH — Current value: <span class="slider-val" id="ph-val">6.5</span></label>
+            <input type="range" id="ph" min="4" max="9" step="0.1" value="6.5"
+              oninput="document.getElementById('ph-val').textContent=parseFloat(this.value).toFixed(1); updatePreview()"/>
+            <div class="slider-labels"><span>Acidic (4.0)</span><span>Neutral (7.0)</span><span>Alkaline (9.0)</span></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Soil Moisture — Current: <span class="slider-val" id="moist-val">40%</span></label>
+            <input type="range" id="moisture" min="10" max="80" step="1" value="40"
+              oninput="document.getElementById('moist-val').textContent=this.value+'%'; updatePreview()"/>
+            <div class="slider-labels"><span>Dry (10%)</span><span>Moderate</span><span>Wet (80%)</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-outline" onclick="resetForm()">↺ Reset</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="submitForm()">
+            🚀 Calculate & Save to Database
+          </button>
+        </div>
+
+        <div id="form-error" style="margin-top:12px;display:none;" class="alert alert-error">
+          <span class="alert-icon">❌</span>
+          <div><div class="alert-title">Error</div><div class="alert-text" id="err-msg"></div></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live Preview -->
+      <div>
+        <div class="card" style="position:sticky;top:80px;">
+          <div class="section-title">👁️ Live Preview</div>
+          <div id="live-preview">
+            <div style="text-align:center;padding:20px;color:var(--muted);">
+              <div style="font-size:40px;margin-bottom:10px;">🌾</div>
+              Fill in the form to see a live preview of your fertilizer requirements
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;background:var(--g-pale);border-color:var(--g-light);">
+          <div style="font-size:13px;font-weight:700;color:var(--g-dark);margin-bottom:10px;">💡 Did You Know?</div>
+          <div id="did-you-know" style="font-size:13px;color:var(--muted);line-height:1.7;">
+            Over-application of nitrogen fertilizer causes eutrophication in water bodies, killing aquatic life. Precision dosing prevents this.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── TAB 2: RESULTS ─── -->
+  <div class="tab-panel" id="panel-results">
+    <div id="results-placeholder" style="text-align:center;padding:60px 24px;color:var(--muted);">
+      <div class="empty-icon">📊</div>
+      <h3>No Results Yet</h3>
+      <p style="margin:10px 0 20px;">Fill in the field parameters and click "Calculate" to see your results here.</p>
+      <button class="btn btn-primary" onclick="switchToTab('inputs')">← Go to Form</button>
+    </div>
+    <div id="results-content" style="display:none;">
+      <div class="metric-grid" id="metric-grid"></div>
+      <div class="grid-2" style="gap:24px; align-items:start;">
+        <div>
+          <div class="section-title">🧪 Fertilizer Mix (per hectare)</div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <table class="data-table"><thead><tr>
+              <th>Fertilizer</th><th>Rate kg/ha</th><th>Total kg</th><th>Type</th>
+            </tr></thead>
+            <tbody id="fert-tbody"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:20px;">
+            <div class="section-title">📊 NPK Balance</div>
+            <div class="card"><div id="npk-bars"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">💡 Recommendations</div>
+          <div id="rec-list"></div>
+          <div class="section-title" style="margin-top:20px;">🌍 Environmental Impact</div>
+          <div class="card"><div id="env-impact"></div></div>
+        </div>
+      </div>
+      <div id="score-box" class="score-box" style="margin-top:24px;"></div>
+      <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+        <button class="btn btn-outline" onclick="switchToTab('inputs')">← Edit Inputs</button>
+        <button class="btn btn-primary" onclick="switchToTab('schedule')">View Schedule →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB 3: SCHEDULE ─── -->
+  <div class="tab-panel" id="panel-schedule">
+    <div id="schedule-placeholder" style="text-align:center;padding:60px;color:var(--muted);">
+      <div class="empty-icon">📅</div>
+      <h3>No Schedule Yet</h3>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="switchToTab('inputs')">← Go to Form</button>
+    </div>
+    <div id="schedule-content" style="display:none;">
+      <div class="grid-2" style="gap:24px;">
+        <div>
+          <div class="section-title">📅 Application Timeline</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+        <div>
+          <div class="section-title">📌 Important Notes</div>
+          <div id="notes-list"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+        <a href="history.html" class="btn btn-outline">View All Records →</a>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 AgroSmart — Minor Project</div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script>
+// ──────────────────────────────────────────────────────
+const CROPS = {
+  wheat:     { n:120, p:60,  k:40,  yield:'3–5 t/ha',   icon:'🌾', water:'Medium' },
+  rice:      { n:100, p:50,  k:50,  yield:'4–6 t/ha',   icon:'🍚', water:'High'   },
+  maize:     { n:150, p:75,  k:40,  yield:'5–8 t/ha',   icon:'🌽', water:'Medium' },
+  sugarcane: { n:200, p:80,  k:120, yield:'60–80 t/ha', icon:'🎋', water:'High'   },
+  cotton:    { n:100, p:50,  k:50,  yield:'2–3 t/ha',   icon:'☁️', water:'Medium' },
+  soybean:   { n:30,  p:60,  k:40,  yield:'2–3 t/ha',   icon:'🫘', water:'Low'    },
+  potato:    { n:180, p:80,  k:150, yield:'20–30 t/ha', icon:'🥔', water:'Medium' },
+  tomato:    { n:140, p:70,  k:120, yield:'25–40 t/ha', icon:'🍅', water:'Medium' },
+};
+const SOIL_MOD  = { loamy:1.0, sandy:1.15, clayey:0.9, silty:0.95, black:0.85 };
+const RES_ADJ   = { none:{n:0,p:0,k:0}, legume:{n:-30,p:0,k:0}, cereal:{n:-10,p:5,k:10}, compost:{n:-20,p:-10,k:-10} };
+const SEASONS   = {
+  kharif:['Pre-sowing (June)','Basal — Sowing (July)','30 DAS (Aug)','60 DAS (Sep)','Pre-harvest (Oct)'],
+  rabi:  ['Pre-sowing (Oct)', 'Basal — Sowing (Nov)', '30 DAS (Dec)','60 DAS (Jan)','Flowering (Feb)'],
+  zaid:  ['Pre-sowing (Feb)', 'Basal — Sowing (Mar)', '30 DAS (Apr)','60 DAS (May)','Maturity (Jun)'],
+};
+const TIPS = [
+  'Over-application of N causes eutrophication in water bodies. Precision dosing prevents this.',
+  'Black soil (Vertisol) is naturally rich in potassium — reducing K input saves money.',
+  'Legume crops like soybean fix up to 200 kg N/ha per season through root bacteria.',
+  'Drip fertigation reduces fertilizer use by 25–35% compared to broadcast application.',
+  'Soil pH between 6.0–7.0 maximizes nutrient availability for 90% of crops.',
+  'Urea applied during rain gets washed away — always apply 2–3 days before rain.',
+];
+let tipIdx = 0;
+setInterval(() => {
+  const el = document.getElementById('did-you-know');
+  if (el) { el.style.opacity='0'; setTimeout(()=>{ el.textContent=TIPS[tipIdx++ % TIPS.length]; el.style.opacity='1'; }, 300); }
+}, 6000);
+
+function getFormState() {
+  return {
+    farmer_name: document.getElementById('farmer_name').value.trim(),
+    field_name:  document.getElementById('field_name').value.trim(),
+    crop:        document.getElementById('crop').value,
+    soil:        document.getElementById('soil').value,
+    ph:          parseFloat(document.getElementById('ph').value),
+    moisture:    parseInt(document.getElementById('moisture').value),
+    area:        parseFloat(document.getElementById('area').value) || 1,
+    season:      document.getElementById('season').value,
+    residue:     document.getElementById('residue').value,
+  };
+}
+
+function calcNPK(s) {
+  const b = CROPS[s.crop], sm = SOIL_MOD[s.soil], ra = RES_ADJ[s.residue];
+  let N = Math.max(0,(b.n*sm)+ra.n), P = Math.max(0,(b.p*sm)+ra.p), K = Math.max(0,(b.k*sm)+ra.k);
+  if (s.ph<5.5){N*=0.85;P*=0.70;} if (s.ph>7.5){P*=0.80;K*=0.90;}
+  if (s.moisture>65) N*=0.90;
+  return { n:Math.round(N), p:Math.round(P), k:Math.round(K) };
+}
+
+// ── Live Preview ─────────────────────────────────────
+function updatePreview() {
+  const s = getFormState();
+  const { n, p, k } = calcNPK(s);
+  const b = CROPS[s.crop];
+  document.getElementById('live-preview').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px;background:var(--g-pale);border-radius:10px;">
+      <span style="font-size:32px;">${b.icon}</span>
+      <div>
+        <div style="font-weight:700;font-size:15px;">${s.crop.charAt(0).toUpperCase()+s.crop.slice(1)}</div>
+        <div style="font-size:12px;color:var(--muted);">${s.soil} soil · ${s.area} ha · ${s.season}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+      <div style="text-align:center;background:#dcfce7;border-radius:10px;padding:12px;">
+        <div style="font-size:11px;color:#166534;font-weight:700;">NITROGEN</div>
+        <div style="font-size:22px;font-weight:800;color:#166534;">${n}</div>
+        <div style="font-size:11px;color:#4b7c52;">kg/ha</div>
+      </div>
+      <div style="text-align:center;background:#dbeafe;border-radius:10px;padding:12px;">
+        <div style="font-size:11px;color:#1e40af;font-weight:700;">PHOSPHORUS</div>
+        <div style="font-size:22px;font-weight:800;color:#1e40af;">${p}</div>
+        <div style="font-size:11px;color:#3b5eb5;">kg/ha</div>
+      </div>
+      <div style="text-align:center;background:#fef3c7;border-radius:10px;padding:12px;">
+        <div style="font-size:11px;color:#92400e;font-weight:700;">POTASSIUM</div>
+        <div style="font-size:22px;font-weight:800;color:#92400e;">${k}</div>
+        <div style="font-size:11px;color:#785230;">kg/ha</div>
+      </div>
+    </div>
+    <div style="font-size:13px;display:flex;justify-content:space-between;padding:10px 14px;background:#f4f9f4;border-radius:8px;">
+      <span>Expected yield:</span><strong>${b.yield}</strong>
+    </div>
+    <div style="font-size:13px;display:flex;justify-content:space-between;padding:8px 14px;">
+      <span>Total N needed:</span><strong>${n * s.area} kg (${s.area} ha)</strong>
+    </div>
+  `;
+}
+
+// ── Submit Form → API ─────────────────────────────────
+async function submitForm() {
+  const s = getFormState();
+  document.getElementById('form-error').style.display = 'none';
+
+  if (!s.farmer_name) {
+    document.getElementById('form-error').style.display = 'flex';
+    document.getElementById('err-msg').textContent = 'Please enter farmer name.';
+    return;
+  }
+
+  const btn = document.querySelector('button[onclick="submitForm()"]');
+  btn.textContent = '⏳ Saving to database...';
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch(`${API}/optimize`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(s),
+    });
+    const data = await resp.json();
+
+    if (!data.success) throw new Error(data.message);
+
+    showToast(`✅ Saved! Record #${data.submission_id} — ${data.message}`);
+    renderResults(s, data);
+    renderSchedule(s, data.npk);
+    switchToTab('results');
+
+  } catch (err) {
+    document.getElementById('form-error').style.display = 'flex';
+    document.getElementById('err-msg').textContent = err.message.includes('fetch') 
+      ? 'Cannot connect to server. Make sure backend is running on port 3000.' 
+      : err.message;
+  } finally {
+    btn.textContent = '🚀 Calculate & Save to Database';
+    btn.disabled = false;
+  }
+}
+
+// ── Render Results ────────────────────────────────────
+function renderResults(s, data) {
+  const { n, p, k } = data.npk;
+  const area = s.area;
+  const b = CROPS[s.crop];
+
+  document.getElementById('metric-grid').innerHTML = `
+    <div class="metric-card n"><div class="metric-icon">🌿</div><div class="metric-num">${n*area}</div><div class="metric-label">Nitrogen (N)</div><div class="metric-unit">${n} kg/ha × ${area} ha</div></div>
+    <div class="metric-card p"><div class="metric-icon">💧</div><div class="metric-num">${p*area}</div><div class="metric-label">Phosphorus (P₂O₅)</div><div class="metric-unit">${p} kg/ha × ${area} ha</div></div>
+    <div class="metric-card k"><div class="metric-icon">🔥</div><div class="metric-num">${k*area}</div><div class="metric-label">Potassium (K₂O)</div><div class="metric-unit">${k} kg/ha × ${area} ha</div></div>
+    <div class="metric-card y"><div class="metric-icon">${b.icon}</div><div class="metric-num" style="font-size:20px;">${b.yield}</div><div class="metric-label">Expected Yield</div><div class="metric-unit">Water: ${b.water}</div></div>
+  `;
+
+  document.getElementById('fert-tbody').innerHTML = data.fert_mix.map(f => `
+    <tr>
+      <td><div style="font-weight:600;">${f.name}</div></td>
+      <td><strong>${f.rate}</strong></td>
+      <td><strong>${f.total}</strong></td>
+      <td><span class="badge badge-${f.type==='Organic'?'green':f.type==='Bio'?'blue':'amber'}">${f.type}</span></td>
+    </tr>
+  `).join('');
+
+  const mx = Math.max(n,p,k,1);
+  document.getElementById('npk-bars').innerHTML = [
+    {l:'Nitrogen (N) — Growth & Leaves', v:n, c:'#2d6a35', bg:'#dcfce7'},
+    {l:'Phosphorus (P) — Roots & Flowers', v:p, c:'#2563eb', bg:'#dbeafe'},
+    {l:'Potassium (K) — Strength & Disease', v:k, c:'#b45309', bg:'#fef3c7'},
+  ].map(b=>`<div class="prog-wrap">
+    <div class="prog-header"><span class="prog-label">${b.l}</span><span class="prog-val">${b.v} kg/ha</span></div>
+    <div class="prog-track" style="background:${b.bg};"><div class="prog-fill" style="width:${Math.round(b.v/mx*100)}%;background:${b.c};"></div></div>
+  </div>`).join('');
+
+  const recs = buildRecs(s, n, p, k);
+  document.getElementById('rec-list').innerHTML = recs.map(r=>`
+    <div class="alert alert-${r.cls}">
+      <span class="alert-icon">${r.icon}</span>
+      <div><div class="alert-title">${r.title}</div><div class="alert-text">${r.text}</div></div>
+    </div>
+  `).join('');
+
+  const saved = Math.round(n*0.3*area);
+  document.getElementById('env-impact').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:10px;">
+        <div style="font-size:22px;">🌿</div>
+        <div style="font-weight:800;font-size:18px;color:#166534;">${saved} kg</div>
+        <div style="font-size:11px;color:#4b7c52;">N Fertilizer Saved</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:10px;">
+        <div style="font-size:22px;">🌍</div>
+        <div style="font-weight:800;font-size:18px;color:#1e40af;">${Math.round(saved*1.9)} kg</div>
+        <div style="font-size:11px;color:#3b5eb5;">CO₂ Prevented</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:10px;">
+        <div style="font-size:22px;">💰</div>
+        <div style="font-weight:800;font-size:18px;color:#92400e;">₹${(saved*6).toLocaleString()}</div>
+        <div style="font-size:11px;color:#785230;">Est. Cost Saved</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#fdf4ff;border-radius:10px;">
+        <div style="font-size:22px;">🐟</div>
+        <div style="font-weight:800;font-size:18px;color:#6b21a8;">${Math.round(saved*0.4)} kg</div>
+        <div style="font-size:11px;color:#6b4e9e;">Reduced Runoff</div>
+      </div>
+    </div>
+  `;
+
+  const sc = data.sus_score;
+  const col = sc>=85?'#4caf50':sc>=70?'#f59e0b':'#ef4444';
+  const lbl = sc>=85?'Excellent 🌟':sc>=70?'Good 👍':'Needs Improvement ⚠️';
+  const r=40, ci=2*Math.PI*r, dash=ci*(sc/100);
+  document.getElementById('score-box').innerHTML = `
+    <svg width="100" height="100">
+      <circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="9"/>
+      <circle cx="50" cy="50" r="${r}" fill="none" stroke="${col}" stroke-width="9"
+        stroke-dasharray="${dash.toFixed(1)} ${ci.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+      <text x="50" y="46" text-anchor="middle" font-family="Syne,sans-serif" font-size="20" font-weight="800" fill="#fff">${sc}</text>
+      <text x="50" y="60" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,0.5)">/100</text>
+    </svg>
+    <div class="score-info">
+      <h3>Sustainability Score: ${lbl}</h3>
+      <p>Record saved as ID #${data.submission_id}. Based on soil health, nutrient balance, organic inputs, and application efficiency for <strong>${s.crop}</strong> on ${area} ha. <a href="history.html" style="color:var(--g-light);">View all records →</a></p>
+    </div>
+  `;
+
+  document.getElementById('results-placeholder').style.display = 'none';
+  document.getElementById('results-content').style.display = 'block';
+}
+
+// ── Render Schedule ───────────────────────────────────
+function renderSchedule(s, npk) {
+  const stages = SEASONS[s.season];
+  const {n,p,k} = npk;
+  const nD=[0,Math.round(n*.4),Math.round(n*.3),Math.round(n*.2),Math.round(n*.1)];
+  const pD=[Math.round(p*.5),Math.round(p*.5),0,0,0];
+  const kD=[0,Math.round(k*.5),Math.round(k*.5),0,0];
+
+  document.getElementById('timeline').innerHTML = stages.map((st,i)=>`
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-stage">${st}</div>
+        <div class="tl-pills">
+          ${nD[i]?`<span class="tl-pill pill-n">N: ${nD[i]} kg/ha</span>`:''}
+          ${pD[i]?`<span class="tl-pill pill-p">P: ${pD[i]} kg/ha</span>`:''}
+          ${kD[i]?`<span class="tl-pill pill-k">K: ${kD[i]} kg/ha</span>`:''}
+          ${!nD[i]&&!pD[i]&&!kD[i]?`<span class="tl-pill pill-none">Monitoring only</span>`:''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('notes-list').innerHTML = [
+    {icon:'💧', title:'Apply after irrigation', text:'Always apply urea after irrigating — never before heavy rain to prevent leaching.'},
+    {icon:'🌅', title:'Early morning preferred', text:'Apply granular fertilizers in early morning or evening to reduce evaporation losses.'},
+    {icon:'♻️', title:'Use split doses', text:'Split N into 3–4 doses for sandy soils. Reduces volatilization and improves uptake by 20%.'},
+    {icon:'🧪', title:'Test soil annually', text:'Get soil tested before every season to update pH, N-P-K status, and micronutrient levels.'},
+  ].map(n=>`<div class="alert alert-info" style="margin-bottom:10px;">
+    <span class="alert-icon">${n.icon}</span>
+    <div><div class="alert-title">${n.title}</div><div class="alert-text">${n.text}</div></div>
+  </div>`).join('');
+
+  document.getElementById('schedule-placeholder').style.display = 'none';
+  document.getElementById('schedule-content').style.display = 'block';
+}
+
+function buildRecs(s, n, p, k) {
+  const r = [];
+  if (s.ph < 5.5) r.push({cls:'warn',icon:'⚠️',title:'Soil too acidic',text:'Apply 2–3 t/ha agricultural lime to raise pH above 6.0.'});
+  else if (s.ph > 7.5) r.push({cls:'warn',icon:'⚠️',title:'Alkaline soil',text:'Apply gypsum at 400–600 kg/ha to improve P and micronutrient availability.'});
+  else r.push({cls:'success',icon:'✅',title:'Soil pH optimal',text:`pH ${s.ph.toFixed(1)} is ideal. Nutrients will be fully available to roots.`});
+  if (s.moisture > 65) r.push({cls:'warn',icon:'💧',title:'High moisture — risk of leaching',text:'Apply N in 4–5 small doses. Use Neem-Coated Urea (NCU) to reduce losses by 15%.'});
+  if (s.residue === 'legume') r.push({cls:'success',icon:'♻️',title:'Legume credit applied',text:'30 kg/ha N deducted from urea requirement — saving cost and emissions.'});
+  if (s.soil === 'sandy') r.push({cls:'info',icon:'🏜️',title:'Sandy soil: use split doses',text:'5 smaller N applications every 12–15 days. Consider drip fertigation for 30% savings.'});
+  r.push({cls:'info',icon:'🌿',title:'Add biofertilizers',text:'Rhizobium + PSB combo improves nutrient uptake by 20% and reduces chemical dependence.'});
+  return r.slice(0,4);
+}
+
+function switchToTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`[data-tab="${name}"]`);
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById(`panel-${name}`);
+  if (panel) panel.classList.add('active');
+}
+
+function resetForm() {
+  document.getElementById('farmer_name').value = '';
+  document.getElementById('field_name').value  = '';
+  document.getElementById('crop').value         = 'wheat';
+  document.getElementById('soil').value         = 'loamy';
+  document.getElementById('ph').value           = 6.5;
+  document.getElementById('ph-val').textContent  = '6.5';
+  document.getElementById('moisture').value     = 40;
+  document.getElementById('moist-val').textContent = '40%';
+  document.getElementById('area').value         = 2;
+  document.getElementById('season').value       = 'kharif';
+  document.getElementById('residue').value      = 'none';
+  document.getElementById('form-error').style.display = 'none';
+  updatePreview();
+}
+
+updatePreview();
+</script>
+</body>
+</html>

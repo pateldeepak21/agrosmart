@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — AgroSmart</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🌱 <span>Agro</span>Smart</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="optimizer.html">Optimizer</a></li>
+      <li><a href="history.html">Field History</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>📖 About This Project</h1>
+    <p>Sustainable Fertilizer Usage Optimizer — Minor Project</p>
+  </div>
+</div>
+
+<div class="container" style="padding:48px 24px 60px; max-width:860px;">
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="section-title">🎯 Project Objective</div>
+    <p style="color:var(--muted);line-height:1.8;font-size:15px;">
+      AgroSmart is a web-based decision support system designed to help farmers optimize fertilizer usage. By analyzing crop type, soil properties, seasonal conditions, and prior crop residue, it calculates the precise Nitrogen (N), Phosphorus (P), and Potassium (K) requirements — reducing waste, cutting costs, and protecting the environment.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="section-title">🛠️ Technology Stack</div>
+    <div class="grid-2">
+      <div>
+        <h4 style="font-family:var(--font-head);margin-bottom:10px;">Frontend</h4>
+        <ul style="list-style:none;color:var(--muted);font-size:14px;line-height:2.2;">
+          <li>✅ HTML5 — Page structure</li>
+          <li>✅ CSS3 — Styling & animations</li>
+          <li>✅ Vanilla JavaScript — Logic & API calls</li>
+          <li>✅ Google Fonts (Syne + DM Sans)</li>
+          <li>✅ Responsive design (mobile ready)</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family:var(--font-head);margin-bottom:10px;">Backend</h4>
+        <ul style="list-style:none;color:var(--muted);font-size:14px;line-height:2.2;">
+          <li>✅ Node.js — Runtime</li>
+          <li>✅ Express.js — Web server & REST API</li>
+          <li>✅ SQLite (better-sqlite3) — Database</li>
+          <li>✅ CORS — Cross-origin resource sharing</li>
+          <li>✅ Nodemon — Development auto-restart</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="section-title">📊 Project Structure</div>
+    <pre style="background:#f4f9f4;border-radius:10px;padding:16px;font-size:13px;overflow-x:auto;line-height:1.9;color:var(--text);">agrosmart/
+├── backend/
+│   ├── server.js          ← Express server + API routes
+│   ├── package.json       ← Node dependencies
+│   └── agrosmart.db       ← SQLite database (auto-created)
+└── frontend/
+    ├── index.html         ← Homepage
+    ├── css/
+    │   └── style.css      ← All styles
+    ├── js/
+    │   └── main.js        ← Shared JS utilities
+    └── pages/
+        ├── optimizer.html ← Main optimizer tool
+        ├── history.html   ← Database records viewer
+        ├── about.html     ← This page
+        └── contact.html   ← Contact form</pre>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="section-title">🌾 NPK Calculation Logic</div>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:14px;">The fertilizer requirements are calculated using agronomic formulas:</p>
+    <div style="background:#f4f9f4;border-radius:10px;padding:16px;font-size:13px;line-height:1.9;">
+      <strong>Step 1:</strong> Get base NPK for crop (e.g., Wheat: N=120, P=60, K=40 kg/ha)<br/>
+      <strong>Step 2:</strong> Apply soil modifier (Sandy +15%, Clayey −10%, Black cotton −15%)<br/>
+      <strong>Step 3:</strong> Subtract prior residue contribution (Legume: −30 kg N)<br/>
+      <strong>Step 4:</strong> Apply pH correction (pH &lt;5.5: reduce N by 15%, P by 30%)<br/>
+      <strong>Step 5:</strong> Apply moisture correction (moisture &gt;65%: reduce N by 10%)<br/>
+      <strong>Step 6:</strong> Calculate sustainability score based on organic use, pH, moisture
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="section-title">🌿 Sustainability Impact</div>
+    <div class="grid-3">
+      <div style="text-align:center;padding:20px;background:var(--g-pale);border-radius:12px;">
+        <div style="font-size:32px;margin-bottom:8px;">🌿</div>
+        <div style="font-weight:700;font-size:15px;">30% Less Fertilizer</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Compared to conventional blanket application</div>
+      </div>
+      <div style="text-align:center;padding:20px;background:#dbeafe;border-radius:12px;">
+        <div style="font-size:32px;margin-bottom:8px;">🌍</div>
+        <div style="font-weight:700;font-size:15px;">CO₂ Reduction</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">1 kg saved N = 1.9 kg CO₂ equivalent prevented</div>
+      </div>
+      <div style="text-align:center;padding:20px;background:#fef3c7;border-radius:12px;">
+        <div style="font-size:32px;margin-bottom:8px;">💰</div>
+        <div style="font-weight:700;font-size:15px;">Cost Savings</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">₹6/kg urea saved = significant per-season savings</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="background:var(--g-dark);color:#fff;">
+    <div class="section-title" style="color:#fff;border:none;">👩‍💻 Developed By</div>
+    <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.8;">
+      This project was developed as a <strong style="color:var(--g-light);">Minor Project</strong> for the degree program.<br/>
+      Subject: Web Technology / Full Stack Development / Agri-Tech<br/>
+      Year: 2024–25<br/>
+      Stack: Node.js + Express + SQLite + HTML/CSS/JS
+    </p>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 AgroSmart — Minor Project</div>
+</footer>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

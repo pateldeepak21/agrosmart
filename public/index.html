@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgroSmart — Fertilizer Optimizer</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <div class="nav-logo">🌱 <span>Agro</span>Smart</div>
+  <div class="nav-links">
+    <a href="/" class="active">🏠 Optimizer</a>
+    <a href="/history">📋 Field History</a>
+    <a href="/reports">📊 Reports</a>
+    <a href="/about">ℹ️ About</a>
+  </div>
+  <span class="nav-badge">Minor Project</span>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-tag">🌾 AI-Powered Precision Agriculture</div>
+    <h1>Sustainable Fertilizer<br/><em>Usage Optimizer</em></h1>
+    <p>Enter field parameters to get precision NPK recommendations. Data is saved to database for future analysis and reporting.</p>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- TABS -->
+  <div style="display:flex;gap:8px;margin-bottom:28px;background:#fff;padding:6px;border-radius:14px;box-shadow:var(--shadow);width:fit-content;">
+    <button class="btn" id="tab-input-btn" onclick="setTab('input')" style="padding:10px 22px;border-radius:10px;background:var(--g-mid);color:#fff;">⚙️ Field Parameters</button>
+    <button class="btn" id="tab-result-btn" onclick="setTab('result')" style="padding:10px 22px;border-radius:10px;background:transparent;color:var(--muted);">📊 Recommendations</button>
+    <button class="btn" id="tab-schedule-btn" onclick="setTab('schedule')" style="padding:10px 22px;border-radius:10px;background:transparent;color:var(--muted);">📅 Schedule</button>
+  </div>
+
+  <!-- ═══ TAB 1: INPUTS ═══ -->
+  <div id="tab-input">
+
+    <div class="grid-2 mb-3">
+      <!-- Farmer Info -->
+      <div class="card">
+        <div class="card-title">👨‍🌾 Farmer Information</div>
+        <div class="form-group">
+          <label class="form-label">Farmer Name *</label>
+          <input class="form-control" id="farmer_name" placeholder="e.g. Ramesh Kumar Patel" required/>
+        </div>
+        <div class="grid-2 gap-2">
+          <div class="form-group">
+            <label class="form-label">Village</label>
+            <input class="form-control" id="village" placeholder="e.g. Sanwer"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">District</label>
+            <input class="form-control" id="district" placeholder="e.g. Indore"/>
+          </div>
+        </div>
+        <div class="grid-2 gap-2">
+          <div class="form-group mb-0">
+            <label class="form-label">Phone</label>
+            <input class="form-control" id="phone" placeholder="10-digit number" maxlength="10"/>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Field Name *</label>
+            <input class="form-control" id="field_name" placeholder="e.g. North Field"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field Details -->
+      <div class="card">
+        <div class="card-title">🌾 Field Details</div>
+        <div class="grid-2 gap-2">
+          <div class="form-group">
+            <label class="form-label">Crop Type *</label>
+            <select class="form-control" id="crop_type" onchange="liveCalc()">
+              <option value="wheat">🌾 Wheat</option>
+              <option value="rice">🍚 Rice</option>
+              <option value="maize">🌽 Maize / Corn</option>
+              <option value="sugarcane">🎋 Sugarcane</option>
+              <option value="cotton">☁️ Cotton</option>
+              <option value="soybean">🫘 Soybean</option>
+              <option value="potato">🥔 Potato</option>
+              <option value="tomato">🍅 Tomato</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Soil Type *</label>
+            <select class="form-control" id="soil_type" onchange="liveCalc()">
+              <option value="loamy">Loamy — Ideal</option>
+              <option value="sandy">Sandy — Low Retention</option>
+              <option value="clayey">Clayey — High Retention</option>
+              <option value="silty">Silty — Moderate</option>
+              <option value="black">Black Cotton Soil</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2 gap-2">
+          <div class="form-group">
+            <label class="form-label">Season *</label>
+            <select class="form-control" id="season">
+              <option value="kharif">Kharif (June–Oct)</option>
+              <option value="rabi">Rabi (Nov–March)</option>
+              <option value="zaid">Zaid (Feb–June)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Field Area (hectares) *</label>
+            <input class="form-control" type="number" id="area_hectares" value="2.0" min="0.1" step="0.1" oninput="liveCalc()"/>
+          </div>
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label">Prior Crop / Residue</label>
+          <select class="form-control" id="prior_residue" onchange="liveCalc()">
+            <option value="none">None — Fresh Field</option>
+            <option value="legume">Legume (adds ~30 kg N/ha)</option>
+            <option value="cereal">Cereal Stubble</option>
+            <option value="compost">Compost Already Applied</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="grid-2 mb-3">
+      <div class="card">
+        <div class="card-title">🧪 Soil pH Level</div>
+        <div class="slider-display" id="ph-val">6.5</div>
+        <input type="range" id="soil_ph" min="4" max="9" step="0.1" value="6.5"
+          oninput="document.getElementById('ph-val').textContent=parseFloat(this.value).toFixed(1);liveCalc()"/>
+        <div class="slider-labels"><span>Acidic (4.0)</span><span>Neutral (7.0)</span><span>Alkaline (9.0)</span></div>
+        <div id="ph-msg" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💧 Soil Moisture</div>
+        <div class="slider-display" id="moist-val">40%</div>
+        <input type="range" id="moisture_pct" min="10" max="80" step="1" value="40"
+          oninput="document.getElementById('moist-val').textContent=this.value+'%';liveCalc()"/>
+        <div class="slider-labels"><span>Dry (10%)</span><span>Moderate</span><span>Wet (80%)</span></div>
+        <div id="moist-msg" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
+      </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="card mb-3" style="background:linear-gradient(135deg,var(--g-dark),#1e4d26);border:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;">⚡ Live Preview (updates automatically)</div>
+        <span id="live-score" style="font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;background:rgba(76,175,80,0.25);color:var(--g-light);">Score: —</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="live-preview">
+        <div style="text-align:center;background:rgba(255,255,255,0.07);border-radius:10px;padding:14px;">
+          <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:4px;">NITROGEN</div>
+          <div id="lp-n" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#a8d5ab;">—</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:11px;">kg/ha</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.07);border-radius:10px;padding:14px;">
+          <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:4px;">PHOSPHORUS</div>
+          <div id="lp-p" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#93c5fd;">—</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:11px;">kg/ha</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.07);border-radius:10px;padding:14px;">
+          <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:4px;">POTASSIUM</div>
+          <div id="lp-k" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fcd34d;">—</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:11px;">kg/ha</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.07);border-radius:10px;padding:14px;">
+          <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:4px;">TOTAL COST</div>
+          <div id="lp-cost" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#e9d5ff;">—</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:11px;">est. ₹</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="clearForm()">↺ Clear</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveField()">
+        💾 Save to Database & Get Full Recommendations
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: RESULTS ═══ -->
+  <div id="tab-result" style="display:none;">
+    <div class="grid-4 mb-3" id="r-metrics"></div>
+    <div class="grid-2 mb-3">
+      <div>
+        <div class="card-title">🧪 Fertilizer Mix</div>
+        <div class="card p-0" style="overflow:hidden;">
+          <table class="data-table">
+            <thead><tr><th>Fertilizer</th><th>Rate (kg/ha)</th><th>Total (kg)</th><th>Type</th></tr></thead>
+            <tbody id="r-fert"></tbody>
+          </table>
+        </div>
+        <div class="card mt-2">
+          <div class="card-title">📊 NPK Balance</div>
+          <div id="r-npk"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">💡 Recommendations</div>
+        <div id="r-recs"></div>
+        <div class="card mt-2" id="r-env"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="setTab('input')">← Edit Inputs</button>
+      <button class="btn btn-primary" onclick="setTab('schedule')">View Schedule →</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 3: SCHEDULE ═══ -->
+  <div id="tab-schedule" style="display:none;">
+    <div class="grid-2 mb-3">
+      <div>
+        <div class="card-title">📅 Application Timeline</div>
+        <div class="timeline" id="r-timeline"></div>
+      </div>
+      <div>
+        <div class="card-title">🌍 Environmental Impact</div>
+        <div class="card" id="r-impact"></div>
+      </div>
+    </div>
+    <!-- Score ring -->
+    <div id="r-score-box" style="background:linear-gradient(135deg,var(--g-dark),#1e4d26);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:28px;"></div>
+    <div class="btn-row mt-2">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ Print Report</button>
+      <button class="btn btn-primary" onclick="location.href='/history'">📋 View All Records →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <strong>AgroSmart Sustainable Fertilizer Optimizer</strong> — Minor Project<br/>
+  <span style="font-size:11px;margin-top:4px;display:block;">B.Sc. / B.Tech Agriculture & Computer Science | For educational use only</span>
+</footer>
+<div id="toast"></div>
+
+<script src="js/app.js"></script>
+<script>
+const SEASONS = {
+  kharif:['Pre-sowing (June)','Basal at Sowing (July)','30 DAS (August)','60 DAS (Sept)','Pre-harvest (Oct)'],
+  rabi:  ['Pre-sowing (Oct)','Basal at Sowing (Nov)','30 DAS (Dec)','60 DAS (Jan)','Flowering (Feb)'],
+  zaid:  ['Pre-sowing (Feb)','Basal at Sowing (Mar)','30 DAS (Apr)','60 DAS (May)','Maturity (June)'],
+};
+
+let lastCalc = null;
+
+// ── Live Preview ──────────────────────────────────────
+function liveCalc() {
+  const crop     = document.getElementById('crop_type').value;
+  const soil     = document.getElementById('soil_type').value;
+  const ph       = parseFloat(document.getElementById('soil_ph').value);
+  const moisture = parseInt(document.getElementById('moisture_pct').value);
+  const area     = parseFloat(document.getElementById('area_hectares').value) || 1;
+  const residue  = document.getElementById('prior_residue').value;
+  const { n, p, k } = calcNPK(crop, soil, ph, moisture, area, residue);
+  const score = calcSusScore(residue, ph, moisture, n, soil);
+  const cost  = Math.round((n * area * 6) + (p * area * 12) + (k * area * 10));
+
+  document.getElementById('lp-n').textContent    = n;
+  document.getElementById('lp-p').textContent    = p;
+  document.getElementById('lp-k').textContent    = k;
+  document.getElementById('lp-cost').textContent = '₹' + cost.toLocaleString('en-IN');
+  document.getElementById('live-score').textContent = 'Score: ' + score + '/100';
+
+  const phMsg = ph < 5.5 ? '⚠️ Too acidic — apply lime' : ph > 7.5 ? '⚠️ Alkaline — apply gypsum' : '✅ pH optimal';
+  document.getElementById('ph-msg').textContent = phMsg;
+  const moistMsg = moisture > 65 ? '⚠️ High moisture — split N doses' : moisture < 20 ? '⚠️ Too dry — irrigate first' : '✅ Moisture acceptable';
+  document.getElementById('moist-msg').textContent = moistMsg;
+
+  lastCalc = { crop, soil, ph, moisture, area, residue, n, p, k, score, cost };
+}
+
+// ── Save to Backend ───────────────────────────────────
+async function saveField() {
+  const data = {
+    farmer_name:   document.getElementById('farmer_name').value.trim(),
+    village:       document.getElementById('village').value.trim(),
+    district:      document.getElementById('district').value.trim(),
+    phone:         document.getElementById('phone').value.trim(),
+    field_name:    document.getElementById('field_name').value.trim() || 'My Field',
+    area_hectares: parseFloat(document.getElementById('area_hectares').value),
+    crop_type:     document.getElementById('crop_type').value,
+    soil_type:     document.getElementById('soil_type').value,
+    soil_ph:       parseFloat(document.getElementById('soil_ph').value),
+    moisture_pct:  parseInt(document.getElementById('moisture_pct').value),
+    season:        document.getElementById('season').value,
+    prior_residue: document.getElementById('prior_residue').value,
+  };
+
+  if (!data.farmer_name) return showToast('Please enter farmer name!', 'error');
+  if (!data.area_hectares || data.area_hectares < 0.1) return showToast('Please enter valid area!', 'error');
+
+  const btn = document.getElementById('save-btn');
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+  btn.disabled = true;
+
+  try {
+    const res = await apiPost('/fields', data);
+    if (res.success) {
+      showToast('✅ Field saved to database! Showing recommendations...');
+      renderResults(res.calculation, data);
+      setTab('result');
+    } else {
+      showToast(res.error || 'Save failed', 'error');
+    }
+  } catch (e) {
+    showToast('Server error: ' + e.message, 'error');
+  } finally {
+    btn.innerHTML = '💾 Save to Database & Get Full Recommendations';
+    btn.disabled = false;
+  }
+}
+
+// ── Render Results ────────────────────────────────────
+function renderResults(calc, data) {
+  const area = parseFloat(data.area_hectares);
+  const n = calc.n_per_ha, p = calc.p_per_ha, k = calc.k_per_ha;
+  const score = calc.sustainability_score;
+
+  // Metrics
+  document.getElementById('r-metrics').innerHTML = `
+    <div class="metric-card n"><div class="metric-icon">🌿</div><div class="metric-num">${calc.total_n}</div><div class="metric-lbl">Nitrogen (N) kg</div><div class="metric-unit">${n} kg/ha</div></div>
+    <div class="metric-card p"><div class="metric-icon">💧</div><div class="metric-num">${calc.total_p}</div><div class="metric-lbl">Phosphorus (P) kg</div><div class="metric-unit">${p} kg/ha</div></div>
+    <div class="metric-card k"><div class="metric-icon">🔥</div><div class="metric-num">${calc.total_k}</div><div class="metric-lbl">Potassium (K) kg</div><div class="metric-unit">${k} kg/ha</div></div>
+    <div class="metric-card s"><div class="metric-icon">📈</div><div class="metric-num" style="font-size:22px;">${calc.expected_yield}</div><div class="metric-lbl">Expected Yield</div><div class="metric-unit">optimized range</div></div>
+  `;
+
+  // Fertilizer Table
+  const fertRows = [
+    ['Vermicompost / FYM', 'Organic N source (1–2% N)', Math.round(n*0.3*12), 'Organic', 'green'],
+    ['Urea', '46-0-0 | Chemical N', Math.round((n*0.7)/0.46), 'Chemical', 'amber'],
+    p>0 ? ['Single Superphosphate (SSP)', '0-16-0 | Also supplies Ca, S', Math.round(p/0.16), 'Chemical', 'amber'] : null,
+    k>0 ? ['Muriate of Potash (MOP)', '0-0-60 | Potassium chloride', Math.round(k/0.60), 'Chemical', 'amber'] : null,
+    ['Rhizobium Biofertilizer', 'N-fixing bacteria', 5, 'Bio', 'blue'],
+    ['PSB', 'Phosphate Solubilizing Bacteria', 5, 'Bio', 'blue'],
+  ].filter(Boolean);
+
+  document.getElementById('r-fert').innerHTML = fertRows.map(([name, formula, rate, type, color]) => `
+    <tr>
+      <td><div class="name">${name}</div><div class="sub">${formula}</div></td>
+      <td class="fw-bold">${rate}</td>
+      <td class="fw-bold">${Math.round(rate * area)}</td>
+      <td><span class="badge badge-${color}">${type}</span></td>
+    </tr>
+  `).join('');
+
+  // NPK Bars
+  const mx = Math.max(n, p, k, 1);
+  document.getElementById('r-npk').innerHTML = [
+    ['Nitrogen (N) — Growth & Leaf', n, '#2d6a35', '#dcfce7'],
+    ['Phosphorus (P) — Root & Flower', p, '#2563eb', '#dbeafe'],
+    ['Potassium (K) — Strength & Disease', k, '#b45309', '#fef3c7'],
+  ].map(([lbl, val, color, bg]) => `
+    <div class="prog-wrap">
+      <div class="prog-head"><span>${lbl}</span><span>${val} kg/ha</span></div>
+      <div class="prog-track" style="background:${bg};">
+        <div class="prog-fill" style="width:${Math.round(val/mx*100)}%;background:${color};"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Recommendations
+  const recs = buildRecs(data, n, p, k);
+  document.getElementById('r-recs').innerHTML = recs.map(r => `
+    <div class="alert ${r.cls}">
+      <div class="alert-icon">${r.icon}</div>
+      <div><div class="alert-title">${r.title}</div><div class="alert-text">${r.text}</div></div>
+    </div>
+  `).join('');
+
+  // Env Impact
+  const nSaved = Math.round(n * 0.3 * area);
+  document.getElementById('r-env').innerHTML = `
+    <div class="card-title">🌍 Environmental Impact</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      ${[['🌿','N Saved',nSaved+' kg','#f0fdf4','#166534'],['🏭','CO₂ Prevented',Math.round(nSaved*1.9)+' kg','#eff6ff','#1e40af'],
+         ['💰','Cost Savings','₹'+Math.round(nSaved*6).toLocaleString('en-IN'),'#fffbeb','#92400e'],['💧','Runoff Reduced',Math.round(nSaved*0.4)+' kg N','#fdf4ff','#6b21a8']]
+       .map(([ic,lbl,val,bg,color]) => `
+        <div style="background:${bg};border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:24px;margin-bottom:4px;">${ic}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:${color};">${val}</div>
+          <div style="font-size:11px;color:var(--muted);">${lbl}</div>
+        </div>`).join('')}
+    </div>
+  `;
+
+  // Timeline
+  const stages = SEASONS[data.season] || SEASONS.kharif;
+  const nD = [0, Math.round(n*.4), Math.round(n*.3), Math.round(n*.2), Math.round(n*.1)];
+  const pD = [Math.round(p*.5), Math.round(p*.5), 0, 0, 0];
+  const kD = [0, Math.round(k*.5), Math.round(k*.5), 0, 0];
+  document.getElementById('r-timeline').innerHTML = stages.map((st, i) => `
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-stage">${st}</div>
+        <div class="tl-pills">
+          ${nD[i]?`<span class="tl-pill pill-n">N: ${nD[i]} kg/ha</span>`:''}
+          ${pD[i]?`<span class="tl-pill pill-p">P: ${pD[i]} kg/ha</span>`:''}
+          ${kD[i]?`<span class="tl-pill pill-k">K: ${kD[i]} kg/ha</span>`:''}
+          ${!nD[i]&&!pD[i]&&!kD[i]?`<span class="tl-pill pill-none">Monitoring only</span>`:''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Score ring
+  const r = 42, circ = 2*Math.PI*r, dash = circ*(score/100);
+  const sc = score>=85?{c:'#4caf50',l:'Excellent 🌟'}:score>=70?{c:'#f59e0b',l:'Good 👍'}:{c:'#ef4444',l:'Needs Improvement ⚠️'};
+  document.getElementById('r-score-box').innerHTML = `
+    <svg width="110" height="110">
+      <circle cx="55" cy="55" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10"/>
+      <circle cx="55" cy="55" r="${r}" fill="none" stroke="${sc.c}" stroke-width="10"
+        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 55 55)"/>
+      <text x="55" y="50" text-anchor="middle" font-family="Syne,sans-serif" font-size="22" font-weight="800" fill="#fff">${score}</text>
+      <text x="55" y="66" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="rgba(255,255,255,0.55)">/100</text>
+    </svg>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;">Sustainability Score: ${sc.l}</div>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-top:6px;max-width:520px;line-height:1.7;">
+        Based on soil health, residue management, pH balance, moisture level, and crop nutrient efficiency for <strong style="color:var(--g-light)">${data.crop_type}</strong> on ${area} hectare(s).
+      </p>
+      <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;">
+        ${[['#4caf50','Soil optimized'],['#60a5fa','Balanced NPK'],['#c084fc','Organic inputs'],['#fbbf24','Split dosing']].map(([c,l])=>`
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.55);">
+            <div style="width:8px;height:8px;border-radius:50%;background:${c};"></div>${l}
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function buildRecs(data, n, p, k) {
+  const recs = [];
+  const ph = parseFloat(data.soil_ph), moisture = parseInt(data.moisture_pct);
+  if (ph < 5.5) recs.push({cls:'warn',icon:'⚠️',title:'Acidic soil — apply agricultural lime',text:`pH ${ph.toFixed(1)} restricts nutrient uptake. Apply 2–3 t/ha CaCO₃ (lime) 3–4 weeks before sowing to reach pH 6.0–6.5.`});
+  else if (ph > 7.5) recs.push({cls:'warn',icon:'⚠️',title:'Alkaline soil — apply gypsum',text:`pH ${ph.toFixed(1)} reduces P & Fe availability. Apply gypsum at 400–600 kg/ha or elemental sulfur at 200 kg/ha.`});
+  else recs.push({cls:'success',icon:'✅',title:'Soil pH is optimal (6.0–7.0)',text:'Nutrients will be absorbed efficiently. No pH amendment needed. Maintain with organic compost each season.'});
+  if (moisture > 65) recs.push({cls:'warn',icon:'💧',title:'High moisture — split N application',text:'Apply N in 4–5 doses every 15 days. Use Neem-Coated Urea (NCU) to reduce volatilization by 12–18%.'});
+  if (data.prior_residue === 'legume') recs.push({cls:'success',icon:'♻️',title:'Legume benefit credited (−30 kg N/ha)',text:'Previous legume crop fixed nitrogen into soil. This saving has been applied to your urea requirement.'});
+  if (data.soil_type === 'sandy') recs.push({cls:'info',icon:'🏜️',title:'Sandy soil — use split + drip fertigation',text:'Sandy soil loses nutrients quickly. Split N into 5 doses; use drip fertigation to reduce leaching by 35–40%.'});
+  recs.push({cls:'info',icon:'🌱',title:'Add biofertilizers for long-term soil health',text:'Rhizobium + PSB + Azotobacter combo improves soil microbiome, reduces chemical fertilizer need by 20%, and increases yield quality.'});
+  return recs.slice(0, 5);
+}
+
+function setTab(tab) {
+  ['input','result','schedule'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+    const btn = document.getElementById('tab-'+t+'-btn');
+    if (btn) {
+      btn.style.background = t===tab?'var(--g-mid)':'transparent';
+      btn.style.color = t===tab?'#fff':'var(--muted)';
+    }
+  });
+}
+
+function clearForm() {
+  document.getElementById('farmer_name').value = '';
+  document.getElementById('village').value     = '';
+  document.getElementById('district').value    = '';
+  document.getElementById('phone').value       = '';
+  document.getElementById('field_name').value  = '';
+  document.getElementById('area_hectares').value = '2.0';
+  document.getElementById('crop_type').value   = 'wheat';
+  document.getElementById('soil_type').value   = 'loamy';
+  document.getElementById('soil_ph').value     = '6.5';
+  document.getElementById('ph-val').textContent = '6.5';
+  document.getElementById('moisture_pct').value = '40';
+  document.getElementById('moist-val').textContent = '40%';
+  document.getElementById('season').value      = 'kharif';
+  document.getElementById('prior_residue').value = 'none';
+  liveCalc();
+}
+
+liveCalc();
+</script>
+</body>
+</html>

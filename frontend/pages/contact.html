@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — AgroSmart</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🌱 <span>Agro</span>Smart</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="optimizer.html">Optimizer</a></li>
+      <li><a href="history.html">Field History</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>📩 Contact Us</h1>
+    <p>Send a message — it gets saved directly in the database</p>
+  </div>
+</div>
+
+<div class="container" style="padding:48px 24px 60px;">
+  <div class="grid-2" style="max-width:900px;margin:0 auto;gap:32px;align-items:start;">
+
+    <!-- Form -->
+    <div class="card">
+      <div class="section-title">✉️ Send a Message</div>
+      <div class="form-group">
+        <label class="form-label">Your Name *</label>
+        <input type="text" id="c-name" class="form-input" placeholder="Full name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" id="c-email" class="form-input" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message *</label>
+        <textarea id="c-msg" class="form-textarea" placeholder="Write your message here..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="sendMessage()">📤 Send Message</button>
+      <div id="contact-result" style="margin-top:14px;display:none;"></div>
+    </div>
+
+    <!-- Info -->
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="section-title">📌 Project Info</div>
+        <div style="color:var(--muted);font-size:14px;line-height:2.1;">
+          <div>🏫 <strong>Institution:</strong> [Your College Name]</div>
+          <div>📚 <strong>Department:</strong> Computer Science / Agriculture</div>
+          <div>🎓 <strong>Year:</strong> 2024–25</div>
+          <div>👩‍💻 <strong>Guide:</strong> [Faculty Guide Name]</div>
+          <div>📧 <strong>Email:</strong> project@agrosmart.edu</div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--g-pale);border-color:var(--g-light);">
+        <div class="section-title">💾 Messages Saved in DB</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">
+          When you submit this form, the message is stored in the <code>contact_messages</code> table of our SQLite database — demonstrating full-stack data persistence.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 AgroSmart — Minor Project</div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script>
+async function sendMessage() {
+  const name  = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const msg   = document.getElementById('c-msg').value.trim();
+  const resEl = document.getElementById('contact-result');
+
+  if (!name||!email||!msg) {
+    resEl.style.display='flex';
+    resEl.className='alert alert-error';
+    resEl.innerHTML='<span class="alert-icon">❌</span><div><div class="alert-title">All fields are required</div></div>';
+    return;
+  }
+
+  const btn = document.querySelector('button[onclick="sendMessage()"]');
+  btn.textContent='⏳ Sending...'; btn.disabled=true;
+
+  try {
+    const r = await fetch('http://localhost:3000/api/contact',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name,email,message:msg})
+    });
+    const d = await r.json();
+    resEl.style.display='flex';
+    resEl.className='alert alert-success';
+    resEl.innerHTML=`<span class="alert-icon">✅</span><div><div class="alert-title">${d.message}</div><div class="alert-text">Your message has been saved to the database.</div></div>`;
+    document.getElementById('c-name').value='';
+    document.getElementById('c-email').value='';
+    document.getElementById('c-msg').value='';
+  } catch(e) {
+    resEl.style.display='flex';
+    resEl.className='alert alert-error';
+    resEl.innerHTML=`<span class="alert-icon">❌</span><div><div class="alert-title">Server Error</div><div class="alert-text">${e.message.includes('fetch')?'Make sure backend is running on port 3000.':e.message}</div></div>`;
+  } finally {
+    btn.textContent='📤 Send Message'; btn.disabled=false;
+  }
+}
+</script>
+</body>
+</html>

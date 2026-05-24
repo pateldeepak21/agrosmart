@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Field History — AgroSmart</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">🌱 <span>Agro</span>Smart</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="optimizer.html">Optimizer</a></li>
+      <li><a href="history.html" class="active">Field History</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>📂 Field History</h1>
+    <p>All submissions saved in the database — sorted by latest first</p>
+  </div>
+</div>
+
+<div class="container" style="padding-top:36px;padding-bottom:60px;">
+
+  <!-- Stats Summary -->
+  <div class="metric-grid" id="stat-grid" style="margin-bottom:28px;">
+    <div class="metric-card n"><div class="metric-icon">📋</div><div class="metric-num" id="s-total">—</div><div class="metric-label">Total Submissions</div></div>
+    <div class="metric-card p"><div class="metric-icon">🌿</div><div class="metric-num" id="s-avgn">—</div><div class="metric-label">Avg. Nitrogen (kg/ha)</div></div>
+    <div class="metric-card k"><div class="metric-icon">🌾</div><div class="metric-num" id="s-crop">—</div><div class="metric-label">Most Common Crop</div></div>
+    <div class="metric-card y"><div class="metric-icon">⭐</div><div class="metric-num" id="s-sus">—</div><div class="metric-label">Avg. Sustainability Score</div></div>
+  </div>
+
+  <!-- Filter / Search -->
+  <div class="card" style="margin-bottom:20px;padding:16px 20px;">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="search-input" class="form-input" placeholder="🔍 Search by farmer name or crop..." style="flex:1;min-width:200px;" oninput="filterTable()"/>
+      <select id="crop-filter" class="form-select" style="width:180px;" onchange="filterTable()">
+        <option value="">All Crops</option>
+        <option value="wheat">Wheat</option>
+        <option value="rice">Rice</option>
+        <option value="maize">Maize</option>
+        <option value="sugarcane">Sugarcane</option>
+        <option value="cotton">Cotton</option>
+        <option value="soybean">Soybean</option>
+        <option value="potato">Potato</option>
+        <option value="tomato">Tomato</option>
+      </select>
+      <button class="btn btn-outline" onclick="loadHistory()">↺ Refresh</button>
+      <a href="optimizer.html" class="btn btn-primary">+ New Entry</a>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="loading" style="padding:40px;text-align:center;">
+      <div class="spinner"></div>
+      <div style="color:var(--muted);margin-top:10px;">Loading records from database...</div>
+    </div>
+    <div id="table-area" style="display:none;">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Farmer</th>
+              <th>Field</th>
+              <th>Crop</th>
+              <th>Soil</th>
+              <th>Area (ha)</th>
+              <th>pH</th>
+              <th>N kg/ha</th>
+              <th>P kg/ha</th>
+              <th>K kg/ha</th>
+              <th>Score</th>
+              <th>Season</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="empty-state" style="display:none;" class="empty-state">
+      <div class="empty-icon">🗂️</div>
+      <h3>No Records Found</h3>
+      <p>No field submissions yet. Go to the Optimizer to add your first entry.</p>
+      <a href="optimizer.html" class="btn btn-primary" style="margin-top:16px;">Open Optimizer →</a>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;overflow-y:auto;">
+    <div style="max-width:700px;margin:40px auto;padding:0 16px;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 style="font-family:var(--font-head);font-size:20px;">📋 Submission Details</h2>
+          <button onclick="closeModal()" class="btn btn-outline btn-sm">✕ Close</button>
+        </div>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">© 2025 AgroSmart — Minor Project</div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script>
+let allRows = [];
+
+async function loadHistory() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('table-area').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+
+  try {
+    // Load stats
+    const sr = await fetch('http://localhost:3000/api/stats');
+    const sd = await sr.json();
+    if (sd.success) {
+      document.getElementById('s-total').textContent = sd.stats.total_submissions;
+      document.getElementById('s-avgn').textContent  = sd.stats.avg_nitrogen || '—';
+      document.getElementById('s-sus').textContent   = sd.stats.avg_sus_score || '—';
+      document.getElementById('s-crop').textContent  = sd.stats.crop_breakdown[0]?.crop || '—';
+    }
+
+    // Load records
+    const hr = await fetch('http://localhost:3000/api/history');
+    const hd = await hr.json();
+    document.getElementById('loading').style.display = 'none';
+
+    if (!hd.success || hd.data.length === 0) {
+      document.getElementById('empty-state').style.display = 'block';
+      return;
+    }
+
+    allRows = hd.data;
+    renderTable(allRows);
+    document.getElementById('table-area').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('loading').innerHTML = `
+      <div style="padding:40px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
+        <h3 style="margin-bottom:8px;">Cannot Connect to Server</h3>
+        <p style="color:var(--muted);margin-bottom:16px;">Make sure the backend is running:<br/><code style="background:#f4f9f4;padding:4px 10px;border-radius:6px;">cd backend &amp;&amp; node server.js</code></p>
+        <button class="btn btn-primary" onclick="loadHistory()">Retry</button>
+      </div>
+    `;
+  }
+}
+
+function renderTable(rows) {
+  const cropIcons = {wheat:'🌾',rice:'🍚',maize:'🌽',sugarcane:'🎋',cotton:'☁️',soybean:'🫘',potato:'🥔',tomato:'🍅'};
+  document.getElementById('hist-tbody').innerHTML = rows.map(r => {
+    const sc = r.sus_score;
+    const scCol = sc>=85?'badge-green':sc>=70?'badge-amber':'badge-red';
+    const d = new Date(r.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    return `<tr>
+      <td><strong>#${r.id}</strong></td>
+      <td>${r.farmer_name}</td>
+      <td style="color:var(--muted)">${r.field_name || '—'}</td>
+      <td>${cropIcons[r.crop]||'🌱'} ${r.crop}</td>
+      <td style="color:var(--muted)">${r.soil}</td>
+      <td style="text-align:center;font-weight:600;">${r.area}</td>
+      <td style="text-align:center;">${r.ph}</td>
+      <td style="text-align:center;color:#166534;font-weight:600;">${r.n_required}</td>
+      <td style="text-align:center;color:#1e40af;font-weight:600;">${r.p_required}</td>
+      <td style="text-align:center;color:#92400e;font-weight:600;">${r.k_required}</td>
+      <td><span class="badge ${scCol}">${Math.round(sc)}</span></td>
+      <td style="color:var(--muted);font-size:12px;">${r.season}</td>
+      <td style="color:var(--muted);font-size:12px;">${d}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="viewDetail(${r.id})" style="margin-right:6px;">👁 View</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRecord(${r.id})">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q    = document.getElementById('search-input').value.toLowerCase();
+  const crop = document.getElementById('crop-filter').value;
+  const filtered = allRows.filter(r =>
+    (!q   || r.farmer_name.toLowerCase().includes(q) || r.crop.toLowerCase().includes(q)) &&
+    (!crop || r.crop === crop)
+  );
+  if (filtered.length === 0) {
+    document.getElementById('table-area').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'block';
+  } else {
+    renderTable(filtered);
+    document.getElementById('table-area').style.display = 'block';
+    document.getElementById('empty-state').style.display = 'none';
+  }
+}
+
+async function viewDetail(id) {
+  document.getElementById('modal-content').innerHTML = '<div class="spinner"></div>';
+  document.getElementById('detail-modal').style.display = 'block';
+  try {
+    const res  = await fetch(`http://localhost:3000/api/history/${id}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    const s = data.submission;
+    const f = data.fertilizers;
+    document.getElementById('modal-content').innerHTML = `
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div><span style="color:var(--muted);font-size:12px;">FARMER</span><div style="font-weight:700;font-size:16px;">${s.farmer_name}</div></div>
+        <div><span style="color:var(--muted);font-size:12px;">FIELD</span><div style="font-weight:700;font-size:16px;">${s.field_name||'—'}</div></div>
+        <div><span style="color:var(--muted);font-size:12px;">CROP</span><div style="font-weight:700;">${s.crop} · ${s.area} ha</div></div>
+        <div><span style="color:var(--muted);font-size:12px;">SOIL</span><div style="font-weight:700;">${s.soil} · pH ${s.ph}</div></div>
+        <div><span style="color:var(--muted);font-size:12px;">SEASON</span><div style="font-weight:700;">${s.season}</div></div>
+        <div><span style="color:var(--muted);font-size:12px;">SUSTAINABILITY SCORE</span><div style="font-weight:700;color:var(--g-mid);font-size:18px;">${Math.round(s.sus_score)} / 100</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <div style="flex:1;text-align:center;background:#dcfce7;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#166534;font-weight:700;">N</div><div style="font-size:22px;font-weight:800;color:#166534;">${s.n_required}</div><div style="font-size:11px;">kg/ha</div></div>
+        <div style="flex:1;text-align:center;background:#dbeafe;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#1e40af;font-weight:700;">P</div><div style="font-size:22px;font-weight:800;color:#1e40af;">${s.p_required}</div><div style="font-size:11px;">kg/ha</div></div>
+        <div style="flex:1;text-align:center;background:#fef3c7;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#92400e;font-weight:700;">K</div><div style="font-size:22px;font-weight:800;color:#92400e;">${s.k_required}</div><div style="font-size:11px;">kg/ha</div></div>
+      </div>
+      <div class="section-title">Fertilizer Mix Applied</div>
+      <table class="data-table" style="margin-bottom:0;">
+        <thead><tr><th>Fertilizer</th><th>Type</th><th>Rate kg/ha</th><th>Total kg</th></tr></thead>
+        <tbody>${f.map(x=>`<tr><td>${x.fert_name}</td><td><span class="badge badge-${x.fert_type==='Organic'?'green':x.fert_type==='Bio'?'blue':'amber'}">${x.fert_type}</span></td><td>${x.rate_per_ha}</td><td>${x.total_qty}</td></tr>`).join('')}</tbody>
+      </table>
+    `;
+  } catch(e) {
+    document.getElementById('modal-content').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
+  }
+}
+
+async function deleteRecord(id) {
+  if (!confirm(`Delete record #${id}? This cannot be undone.`)) return;
+  try {
+    const r = await fetch(`http://localhost:3000/api/history/${id}`, { method:'DELETE' });
+    const d = await r.json();
+    if (d.success) { showToast('✅ Record deleted.'); loadHistory(); }
+    else throw new Error(d.message);
+  } catch(e) { showToast('❌ Error: ' + e.message); }
+}
+
+function closeModal() { document.getElementById('detail-modal').style.display = 'none'; }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+loadHistory();
+</script>
+</body>
+</html>

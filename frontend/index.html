@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgroSmart — Sustainable Fertilizer Optimizer</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">🌱 <span>Agro</span>Smart</a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="pages/optimizer.html">Optimizer</a></li>
+      <li><a href="pages/history.html">Field History</a></li>
+      <li><a href="pages/about.html">About</a></li>
+      <li><a href="pages/contact.html">Contact</a></li>
+    </ul>
+    <a href="pages/optimizer.html" class="btn btn-nav">Start Optimizing →</a>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-bg-circles">
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="circle c3"></div>
+  </div>
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <span class="hero-tag">🌾 AI-Powered Smart Agriculture</span>
+      <h1>Grow More.<br/><em>Waste Less.</em><br/>Farm Smarter.</h1>
+      <p>AgroSmart calculates the exact fertilizer your field needs — based on crop type, soil health, season, and prior residue. Save money, protect the environment, maximize yield.</p>
+      <div class="hero-btns">
+        <a href="pages/optimizer.html" class="btn btn-primary btn-lg">🚀 Start Optimizing</a>
+        <a href="pages/about.html" class="btn btn-outline btn-lg">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="floating-card">
+        <div class="fc-header">
+          <span class="fc-icon">🌾</span>
+          <div>
+            <div class="fc-crop">Wheat — Loamy Soil</div>
+            <div class="fc-area">2.5 Hectares • Kharif Season</div>
+          </div>
+        </div>
+        <div class="fc-npk">
+          <div class="fc-pill n">N <strong>120</strong> kg/ha</div>
+          <div class="fc-pill p">P <strong>60</strong> kg/ha</div>
+          <div class="fc-pill k">K <strong>40</strong> kg/ha</div>
+        </div>
+        <div class="fc-score">
+          <span class="fc-score-label">Sustainability Score</span>
+          <span class="fc-score-val">82 / 100 ✅</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ STATS ═══════════════ -->
+<section class="stats-bar">
+  <div class="container stats-grid">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-lbl">Fields Optimized</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">30%</div>
+      <div class="stat-lbl">Average Fertilizer Saved</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">8</div>
+      <div class="stat-lbl">Crops Supported</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-score">—</div>
+      <div class="stat-lbl">Avg. Sustainability Score</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-head-center">
+      <span class="section-tag">Process</span>
+      <h2>How AgroSmart Works</h2>
+      <p>Three simple steps to precision fertilizer recommendations</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">📋</div>
+        <h3>Enter Field Data</h3>
+        <p>Fill in your crop type, soil type, pH level, moisture, field area, and season details.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🧮</div>
+        <h3>AI Calculates NPK</h3>
+        <p>Our algorithm computes exact Nitrogen, Phosphorus, and Potassium needs. Data is saved to database.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">📊</div>
+        <h3>Get Full Report</h3>
+        <p>Receive fertilizer mix, application schedule, sustainability score, and cost savings estimate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FEATURES ═══════════════ -->
+<section class="section bg-pale">
+  <div class="container">
+    <div class="section-head-center">
+      <span class="section-tag">Features</span>
+      <h2>Why Choose AgroSmart?</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🌿</div>
+        <h3>Organic + Chemical Mix</h3>
+        <p>Recommends 30% organic (vermicompost) + biofertilizers for sustainable soil health.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📅</div>
+        <h3>Season-wise Schedule</h3>
+        <p>Split-dose application timeline for Kharif, Rabi, and Zaid seasons.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💾</div>
+        <h3>Data Stored in Database</h3>
+        <p>Every field submission saved in SQLite — review history anytime.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌍</div>
+        <h3>Environmental Impact</h3>
+        <p>See CO₂ saved, cost reduction, and water runoff prevention for each field.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📈</div>
+        <h3>Yield Optimization</h3>
+        <p>Adjusts NPK based on soil pH, moisture, and prior crop residue for maximum yield.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔬</div>
+        <h3>Soil pH Correction</h3>
+        <p>Recommends lime or gypsum if soil pH is out of the ideal 6.0–7.0 range.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="cta-section">
+  <div class="container cta-inner">
+    <h2>Ready to optimize your field?</h2>
+    <p>Enter your field parameters and get precise recommendations in seconds — completely free.</p>
+    <a href="pages/optimizer.html" class="btn btn-primary btn-lg">Open Optimizer →</a>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">🌱 <strong>AgroSmart</strong></div>
+      <p>Sustainable Fertilizer Optimizer<br/>Minor Project — B.Sc./B.Tech Agriculture & CS</p>
+    </div>
+    <div class="footer-links">
+      <h4>Pages</h4>
+      <a href="index.html">Home</a>
+      <a href="pages/optimizer.html">Optimizer</a>
+      <a href="pages/history.html">Field History</a>
+      <a href="pages/contact.html">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Info</h4>
+      <a href="pages/about.html">About Project</a>
+      <a href="#">Documentation</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2025 AgroSmart — Minor Project | Built with Node.js + SQLite + Vanilla JS
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // Load live stats from backend
+  fetch('http://localhost:3000/api/stats')
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        document.getElementById('stat-total').textContent  = d.stats.total_submissions;
+        document.getElementById('stat-score').textContent  = d.stats.avg_sus_score || '—';
+      }
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
