@@ -5,7 +5,7 @@ const path       = require('path');
 const sqlite3    = require('sqlite3').verbose();
 
 const app  = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const db = new sqlite3.Database(path.join(__dirname, 'agrosmart.db'), (err) => {
   if (err) console.error('DB Error:', err);
