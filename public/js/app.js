@@ -2,7 +2,7 @@
 //  public/js/app.js — Shared Utilities
 // ═══════════════════════════════════════════════════════
 
-const API = 'http://localhost:3000/api';
+const API = 'https://agrosmart-97ts.onrender.com';
 
 // ── Toast Notification ──────────────────────────────
 function showToast(msg, type = 'success') {

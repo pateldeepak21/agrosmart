@@ -129,7 +129,7 @@ async function loadHistory() {
 
   try {
     // Load stats
-    const sr = await fetch('http://localhost:3000/api/stats');
+    const sr = await fetch('/api/stats');
     const sd = await sr.json();
     if (sd.success) {
       document.getElementById('s-total').textContent = sd.stats.total_submissions;
@@ -139,7 +139,7 @@ async function loadHistory() {
     }
 
     // Load records
-    const hr = await fetch('http://localhost:3000/api/history');
+    const hr = await fetch('/api/history')  // localhost hata do
     const hd = await hr.json();
     document.getElementById('loading').style.display = 'none';
 
@@ -213,7 +213,7 @@ async function viewDetail(id) {
   document.getElementById('modal-content').innerHTML = '<div class="spinner"></div>';
   document.getElementById('detail-modal').style.display = 'block';
   try {
-    const res  = await fetch(`http://localhost:3000/api/history/${id}`);
+    const res  = await fetch('/api/history') ; // localhost hata do
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
     const s = data.submission;
@@ -246,7 +246,7 @@ async function viewDetail(id) {
 async function deleteRecord(id) {
   if (!confirm(`Delete record #${id}? This cannot be undone.`)) return;
   try {
-    const r = await fetch(`http://localhost:3000/api/history/${id}`, { method:'DELETE' });
+    const r = await fetch('/api/history') ; // localhost hata do${id}`, { method:'DELETE' });
     const d = await r.json();
     if (d.success) { showToast('✅ Record deleted.'); loadHistory(); }
     else throw new Error(d.message);

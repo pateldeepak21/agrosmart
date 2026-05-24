@@ -199,7 +199,7 @@
 <script src="js/main.js"></script>
 <script>
   // Load live stats from backend
-  fetch('http://localhost:3000/api/stats')
+  fetch('/api/stats')  // localhost hata do
     .then(r => r.json())
     .then(d => {
       if (d.success) {

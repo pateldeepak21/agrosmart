@@ -2,7 +2,7 @@
 //  AgroSmart — main.js   (shared across all pages)
 // ═══════════════════════════════════════════════════
 
-const API = 'http://localhost:3000/api';
+const API = 'https://agrosmart-97ts.onrender.com';
 
 // ── Toast notification ────────────────────────────
 function showToast(msg, duration = 3000) {
