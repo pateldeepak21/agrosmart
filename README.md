@@ -187,4 +187,4 @@ Messages from the contact form.
 
 ---
 
-*AgroSmart — Minor Project 2024-25*
+*AgroSmart — Minor Project 2026-27*
