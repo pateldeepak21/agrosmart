@@ -199,12 +199,12 @@
 <script src="js/main.js"></script>
 <script>
   // Load live stats from backend
-  fetch('/api/stats')  // localhost hata do
+  fetch('/api/stats')
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        document.getElementById('stat-total').textContent  = d.stats.total_submissions;
-        document.getElementById('stat-score').textContent  = d.stats.avg_sus_score || '—';
+        document.getElementById('stat-total').textContent = d.stats.total_submissions;
+        document.getElementById('stat-score').textContent = d.stats.avg_sus_score || '—';
       }
     })
     .catch(() => {});
